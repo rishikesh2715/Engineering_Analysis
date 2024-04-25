@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from scipy.stats import poisson
 
 def generate_poisson_arrivals(rate, max_time):
-    """ Generate arrival times for the Poisson process up to max_time """
     arrivals = []
     current_time = 0
     while current_time < max_time:
@@ -15,7 +14,6 @@ def generate_poisson_arrivals(rate, max_time):
     return arrivals
 
 def generate_constant_rate_arrivals(rate, max_time):
-    """ Generate arrival times for parts arriving at a constant rate up to max_time """
     interval = rate
     return np.arange(interval, max_time, interval)
 
@@ -26,36 +24,26 @@ def simulate_system(max_time, poisson_rate, constant_rate, failure_rate, down_ti
     
     assembled_count = 0
     current_time = 0
-    failure_active_until = -1  # Time until which the station is down
+    failure_active_until = -1
 
-    # Sort all events to simulate in time order
     events = sorted([(t, 'poisson') for t in poisson_arrivals] + [(t, 'constant') for t in constant_arrivals])
 
     for event_time, event_type in events:
         if event_time >= next_failure_time:
-            # Station fails
             failure_active_until = event_time + down_time
-            # Schedule next failure
             next_failure_time += np.random.exponential(1/failure_rate)
 
         if event_time >= failure_active_until:
-            # If the station is up, we can process parts
             assembled_count += 1
 
     return assembled_count, assembled_count / max_time
 
 def generate_time_to_failure(failure_rate):
-    """
-    Generate the time to the next failure based on an exponential distribution.
-    
-    :param failure_rate: The rate parameter lambda, which is the mean failure rate per unit time.
-    :return: The time until the next failure occurs.
-    """
     U = np.random.uniform()
-    T = -np.log(U) / failure_rate  # Using the transformed inverse CDF of the exponential distribution.
+    T = -np.log(U) / failure_rate
     return T
 
-# Example of generating a time to failure
+
 failure_rate = 0.01  # failures per second
 time_to_failure = generate_time_to_failure(failure_rate)
 print(f"Time to next failure: {time_to_failure} seconds")
